@@ -80,14 +80,10 @@ export default function CuentaPage() {
             <CardHeader>
               <CardTitle>Información Personal</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent>
               <div>
                 <span className="text-sm text-gray-600">Nombre:</span>
                 <p className="font-medium text-gray-900">{profile?.nombre}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Email:</span>
-                <p className="font-medium text-gray-900">{profile?.email}</p>
               </div>
             </CardContent>
           </Card>
@@ -101,12 +97,7 @@ export default function CuentaPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <span className="text-3xl">{badge.emoji}</span>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">{badge.name}</h3>
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${badge.color} mt-1`}>
-                      {suscripcion?.estado === 'active' ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">{badge.name}</h3>
                 </div>
                 {profile?.plan_id === 'free' && (
                   <Link href="/planes">
