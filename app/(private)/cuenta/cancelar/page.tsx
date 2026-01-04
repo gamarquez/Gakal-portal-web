@@ -27,7 +27,7 @@ export default function CancelarSuscripcionPage() {
         .from('perfiles')
         .select('suscripcion_activa_id')
         .eq('id', user.id)
-        .single()
+        .single<{ suscripcion_activa_id: string | null }>()
 
       if (!profileData?.suscripcion_activa_id) {
         router.push('/cuenta')
@@ -66,7 +66,7 @@ export default function CancelarSuscripcionPage() {
 
       // Redirigir a cuenta con mensaje de éxito
       router.push('/cuenta?canceled=true')
-    } catch (err) {
+    } catch {
       setError('Error al cancelar la suscripción')
       setCanceling(false)
     }

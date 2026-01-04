@@ -34,14 +34,14 @@ export async function POST(request: NextRequest) {
       .from('perfiles')
       .select('suscripcion_activa_id')
       .eq('id', user.id)
-      .single()
+      .single<{ suscripcion_activa_id: string | null }>()
 
     if (profile?.suscripcion_activa_id) {
       const { data: suscripcionActual } = await supabase
         .from('suscripciones')
         .select('estado')
         .eq('id', profile.suscripcion_activa_id)
-        .single()
+        .single<{ estado: 'active' | 'paused' | 'cancelled' | 'expired' }>()
 
       if (suscripcionActual?.estado === 'active') {
         return NextResponse.json(
@@ -73,7 +73,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear registro de suscripción en estado pending
-    const { data: newSuscripcion, error: suscripcionError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: newSuscripcion, error: suscripcionError } = await (supabase as any)
       .from('suscripciones')
       .insert({
         usuario_id: user.id,

@@ -71,7 +71,7 @@ export default function CheckoutPage() {
 
       // Redirigir a Mercado Pago
       window.location.href = data.init_point
-    } catch (err) {
+    } catch {
       setError('Error al procesar el pago')
       setLoading(false)
     }
@@ -185,7 +185,7 @@ export default function CheckoutPage() {
               </div>
 
               <p className="mt-4 text-xs text-center text-gray-500">
-                Al hacer clic en "Pagar con Mercado Pago", serás redirigido a
+                Al hacer clic en &quot;Pagar con Mercado Pago&quot;, serás redirigido a
                 completar el pago de forma segura. Tu suscripción se activará
                 automáticamente una vez confirmado el pago.
               </p>

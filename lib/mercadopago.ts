@@ -87,16 +87,14 @@ export async function getPreApproval(preapprovalId: string) {
   }
 }
 
-export function verifyWebhookSignature(
-  xSignature: string,
-  xRequestId: string,
-  dataId: string
-): boolean {
-  // Implementar verificación de firma del webhook
-  // Ver: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
-  const secret = process.env.MP_WEBHOOK_SECRET!
-
-  // TODO: Implementar verificación con HMAC
-  // Por ahora retornamos true para desarrollo
-  return true
-}
+// TODO: Implementar verificación de firma del webhook
+// export function verifyWebhookSignature(
+//   xSignature: string,
+//   xRequestId: string,
+//   dataId: string
+// ): boolean {
+//   // Ver: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
+//   const secret = process.env.MP_WEBHOOK_SECRET!
+//   // Implementar verificación con HMAC
+//   return true
+// }

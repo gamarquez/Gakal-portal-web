@@ -13,19 +13,19 @@ export async function createClient() {
         get(name: string) {
           return cookieStore.get(name)?.value
         },
-        set(name: string, value: string, options) {
+        set(name: string, value: string, options: object) {
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (error) {
+          } catch {
             // El método `set` fue llamado desde un Server Component
             // Esto puede ser ignorado si tienes middleware refrescando
             // las cookies del usuario
           }
         },
-        remove(name: string, options) {
+        remove(name: string, options: object) {
           try {
             cookieStore.set({ name, value: '', ...options })
-          } catch (error) {
+          } catch {
             // El método `delete` fue llamado desde un Server Component
             // Esto puede ser ignorado si tienes middleware refrescando
             // las cookies del usuario

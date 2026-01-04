@@ -16,7 +16,7 @@ export default function TerminosPage() {
               1. Aceptación de los Términos
             </h2>
             <p>
-              Al acceder y usar Gakal (la "App" y el "Servicio"), aceptás estar vinculado
+              Al acceder y usar Gakal (la &quot;App&quot; y el &quot;Servicio&quot;), aceptás estar vinculado
               por estos Términos y Condiciones y todas las leyes y regulaciones aplicables
               en Argentina. Si no estás de acuerdo con alguno de estos términos, tenés
               prohibido usar o acceder a este sitio y aplicación.

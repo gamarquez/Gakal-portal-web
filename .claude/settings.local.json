@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(npm run build:*)",
+      "Bash(tee:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

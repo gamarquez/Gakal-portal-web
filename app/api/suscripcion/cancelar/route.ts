@@ -1,12 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { cancelPreApproval } from '@/lib/mercadopago'
 import { NextResponse } from 'next/server'
+import { Suscripcion } from '@/types'
 
 export async function POST() {
   try {
     // Verificar autenticación
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const authClient = await createClient()
+    const { data: { user }, error: authError } = await authClient.auth.getUser()
 
     if (authError || !user) {
       return NextResponse.json(
@@ -15,12 +16,15 @@ export async function POST() {
       )
     }
 
+    // Usar admin client para operaciones de base de datos
+    const supabase = createAdminClient()
+
     // Obtener suscripción activa
     const { data: profile } = await supabase
       .from('perfiles')
       .select('suscripcion_activa_id')
       .eq('id', user.id)
-      .single()
+      .single<{ suscripcion_activa_id: string | null }>()
 
     if (!profile?.suscripcion_activa_id) {
       return NextResponse.json(
@@ -33,7 +37,7 @@ export async function POST() {
       .from('suscripciones')
       .select('*')
       .eq('id', profile.suscripcion_activa_id)
-      .single()
+      .single<Suscripcion>()
 
     if (!suscripcion || suscripcion.estado !== 'active') {
       return NextResponse.json(
@@ -55,7 +59,8 @@ export async function POST() {
     }
 
     // Actualizar estado en Supabase
-    const { error: updateError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase as any)
       .from('suscripciones')
       .update({
         estado: 'cancelled',
@@ -82,3 +87,5 @@ export async function POST() {
     )
   }
 }
+
+export const runtime = 'edge'

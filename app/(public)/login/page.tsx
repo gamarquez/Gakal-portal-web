@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()

@@ -1,17 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { formatPrice } from '@/types/plans'
 import { formatDate } from '@/lib/utils'
 import { UserProfile, Suscripcion } from '@/types'
 import Link from 'next/link'
 
 export default function CuentaPage() {
-  const router = useRouter()
   const supabase = createClient()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -28,7 +25,7 @@ export default function CuentaPage() {
         .from('perfiles')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .single<UserProfile>()
 
       setProfile(profileData)
 

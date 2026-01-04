@@ -19,7 +19,7 @@ export async function GET() {
       .from('perfiles')
       .select('plan_id, suscripcion_activa_id')
       .eq('id', user.id)
-      .single()
+      .single<{ plan_id: string; suscripcion_activa_id: string | null }>()
 
     if (!profile) {
       return NextResponse.json(

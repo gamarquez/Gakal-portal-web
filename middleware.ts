@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
         get(name: string) {
           return request.cookies.get(name)?.value
         },
-        set(name: string, value: string, options) {
+        set(name: string, value: string, options: object) {
           request.cookies.set({
             name,
             value,
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
             ...options,
           })
         },
-        remove(name: string, options) {
+        remove(name: string, options: object) {
           request.cookies.set({
             name,
             value: '',

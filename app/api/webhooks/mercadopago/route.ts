@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    // Obtener headers de Mercado Pago
-    const xSignature = request.headers.get('x-signature')
-    const xRequestId = request.headers.get('x-request-id')
+    // Obtener headers de Mercado Pago (para futuro uso en verificación HMAC)
+    // const _xSignature = request.headers.get('x-signature')
+    // const _xRequestId = request.headers.get('x-request-id')
 
     // Parsear body
     const body = await request.json()
@@ -50,7 +50,14 @@ export async function POST(request: NextRequest) {
       .from('suscripciones')
       .select('*')
       .eq('mp_preapproval_id', preapprovalId)
-      .single()
+      .single<{
+        id: string
+        usuario_id: string
+        plan_id: string
+        estado: 'active' | 'paused' | 'cancelled' | 'expired'
+        es_anual: boolean
+        fecha_cancelacion: string | null
+      }>()
 
     if (!suscripcion) {
       console.error('Suscripción no encontrada para preapproval:', preapprovalId)
@@ -78,7 +85,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Actualizar suscripción en Supabase
-    const updateData: any = {
+    const updateData: {
+      estado: 'active' | 'paused' | 'cancelled' | 'expired'
+      fecha_inicio?: string
+      fecha_fin?: string
+      fecha_cancelacion?: string
+    } = {
       estado: nuevoEstado,
     }
 
@@ -101,7 +113,8 @@ export async function POST(request: NextRequest) {
       updateData.fecha_cancelacion = new Date().toISOString()
     }
 
-    const { error: updateError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase as any)
       .from('suscripciones')
       .update(updateData)
       .eq('id', suscripcion.id)
@@ -115,7 +128,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Actualizar perfil del usuario con el nuevo plan
-    const { error: profileError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: profileError } = await (supabase as any)
       .from('perfiles')
       .update({
         plan_id: nuevoEstado === 'active' ? suscripcion.plan_id : 'free',

@@ -26,7 +26,7 @@ export default function CheckoutExitoPage() {
                 <li>Tu plan premium ya está activo</li>
                 <li>Volvé a la app de Gakal para disfrutar todas las funciones</li>
                 <li>Vas a recibir un email de confirmación con los detalles</li>
-                <li>Podés gestionar tu suscripción desde "Mi Cuenta"</li>
+                <li>Podés gestionar tu suscripción desde &quot;Mi Cuenta&quot;</li>
               </ul>
             </div>
 
