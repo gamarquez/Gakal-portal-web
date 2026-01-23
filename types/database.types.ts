@@ -17,6 +17,10 @@ export interface Database {
           avatar_url: string | null
           plan_id: string
           suscripcion_activa_id: string | null
+          terminos_aceptados: boolean
+          terminos_fecha_aceptacion: string | null
+          terminos_ip_aceptacion: string | null
+          terminos_version_aceptada: string | null
           created_at: string
           updated_at: string
         }
@@ -27,6 +31,10 @@ export interface Database {
           avatar_url?: string | null
           plan_id?: string
           suscripcion_activa_id?: string | null
+          terminos_aceptados?: boolean
+          terminos_fecha_aceptacion?: string | null
+          terminos_ip_aceptacion?: string | null
+          terminos_version_aceptada?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -37,6 +45,10 @@ export interface Database {
           avatar_url?: string | null
           plan_id?: string
           suscripcion_activa_id?: string | null
+          terminos_aceptados?: boolean
+          terminos_fecha_aceptacion?: string | null
+          terminos_ip_aceptacion?: string | null
+          terminos_version_aceptada?: string | null
           created_at?: string
           updated_at?: string
         }

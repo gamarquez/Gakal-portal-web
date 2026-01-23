@@ -1,0 +1,131 @@
+{
+  "documento": "Términos y Condiciones",
+  "empresa": "Gakal",
+  "version": "1.0",
+  "fecha_actualizacion": "2026-01-21",
+  "pais": "Argentina",
+  "legislacion": [
+    "Ley 25.326 - Protección de Datos Personales",
+    "Ley 24.240 - Defensa del Consumidor",
+    "Ley 11.723 - Propiedad Intelectual",
+    "Código Civil y Comercial de la Nación"
+  ],
+  "jurisdiccion": "Buenos Aires, Argentina",
+  "secciones": [
+    {
+      "numero": 1,
+      "titulo": "Definiciones",
+      "contenido": [
+        "Usuario: Persona física mayor de 18 años que se registra y utiliza la Aplicación.",
+        "Contenido: Información, datos, textos, fotografías y demás materiales ingresados por el Usuario.",
+        "Servicios: Funcionalidades ofrecidas por Gakal, incluyendo registro de comidas, análisis nutricional con IA, gamificación, y planes de suscripción."
+      ]
+    },
+    {
+      "numero": 2,
+      "titulo": "Objeto",
+      "contenido": [
+        "Gakal es una plataforma de registro nutricional con gamificación que permite a los Usuarios trackear comidas, analizar fotos de alimentos mediante inteligencia artificial, y mantener hábitos saludables. Los Servicios se ofrecen en modalidad gratuita (Free) y de pago (Bronce, Plata, Oro)."
+      ]
+    },
+    {
+      "numero": 3,
+      "titulo": "Registro y Cuenta de Usuario",
+      "contenido": [
+        "Para utilizar la Aplicación, debés crear una cuenta proporcionando información veraz, exacta y actualizada.",
+        "Sos responsable de mantener la confidencialidad de tu contraseña y de todas las actividades realizadas bajo tu cuenta.",
+        "Nos reservamos el derecho de suspender o eliminar cuentas que violen estos Términos o realicen actividades fraudulentas.",
+        "Los menores de 18 años no pueden registrarse sin autorización de un adulto responsable."
+      ]
+    },
+    {
+      "numero": 4,
+      "titulo": "Uso Permitido de la Aplicación",
+      "contenido": [
+        "Te comprometés a utilizar la Aplicación únicamente para los fines previstos y de conformidad con la legislación argentina vigente. Queda expresamente prohibido:",
+        "• Publicar contenido ilegal, difamatorio, obsceno o que viole derechos de terceros.",
+        "• Realizar ingeniería inversa, descompilar o intentar extraer el código fuente.",
+        "• Utilizar bots, scripts o sistemas automatizados no autorizados.",
+        "• Revender, redistribuir o explotar comercialmente los Servicios sin autorización."
+      ]
+    },
+    {
+      "numero": 5,
+      "titulo": "Propiedad Intelectual",
+      "contenido": [
+        "Todos los derechos de propiedad intelectual sobre la Aplicación, su diseño, código, marca 'Gakal', logotipos y contenido son de exclusiva propiedad de la Empresa, protegidos por las leyes argentinas e internacionales (Ley 11.723, Ley 22.362).",
+        "El Usuario conserva la propiedad del Contenido que cargue, otorgándonos una licencia no exclusiva, gratuita y mundial para almacenarlo y procesarlo únicamente para prestar los Servicios."
+      ]
+    },
+    {
+      "numero": 6,
+      "titulo": "Privacidad y Protección de Datos Personales",
+      "contenido": [
+        "El tratamiento de tus datos personales se rige por nuestra Política de Privacidad y la Ley 25.326 de Protección de Datos Personales.",
+        "Tenés derecho de acceso, rectificación, actualización y supresión de tus datos personales conforme al artículo 14 de la Ley 25.326.",
+        "Los datos de salud y nutricionales son considerados datos sensibles bajo la Ley 25.326 y serán tratados con especial cuidado y confidencialidad."
+      ]
+    },
+    {
+      "numero": 7,
+      "titulo": "Planes de Suscripción y Pagos",
+      "contenido": [
+        "Gakal ofrece un plan gratuito (Free) y planes de pago (Bronce, Plata, Oro) con diferentes funcionalidades.",
+        "Los pagos se procesan mediante plataformas externas (Mercado Pago, etc.) conforme a la legislación de Defensa del Consumidor (Ley 24.240).",
+        "Las suscripciones se renuevan automáticamente. Podés cancelar en cualquier momento desde la gestión de tu cuenta.",
+        "Los precios están expresados en pesos argentinos (ARS) e incluyen IVA cuando corresponda.",
+        "No se realizan reembolsos por períodos no utilizados, salvo en casos previstos por la Ley de Defensa del Consumidor."
+      ]
+    },
+    {
+      "numero": 8,
+      "titulo": "Limitación de Responsabilidad",
+      "contenido": [
+        "Gakal es una herramienta de registro nutricional y NO sustituye el consejo médico profesional.",
+        "No nos responsabilizamos por decisiones de salud tomadas basándose exclusivamente en la información de la Aplicación.",
+        "El análisis de fotos con IA es estimativo y puede contener imprecisiones. Verificá la información nutricional cuando sea crítico para tu salud.",
+        "No garantizamos disponibilidad ininterrumpida de los Servicios. Podemos realizar mantenimientos programados con previo aviso."
+      ]
+    },
+    {
+      "numero": 9,
+      "titulo": "Modificaciones a los Términos",
+      "contenido": [
+        "Nos reservamos el derecho de modificar estos Términos en cualquier momento. Los cambios sustanciales serán notificados con 10 días de anticipación. El uso continuado de la Aplicación después de dichos cambios constituye aceptación de los nuevos términos."
+      ]
+    },
+    {
+      "numero": 10,
+      "titulo": "Rescisión",
+      "contenido": [
+        "Podés cancelar tu cuenta en cualquier momento desde la configuración. Nos reservamos el derecho de suspender o cancelar cuentas que violen estos Términos, sin previo aviso y sin derecho a reembolso."
+      ]
+    },
+    {
+      "numero": 11,
+      "titulo": "Legislación Aplicable y Jurisdicción",
+      "contenido": [
+        "Estos Términos se rigen por las leyes de la República Argentina, específicamente:",
+        "• Ley 25.326 - Protección de Datos Personales",
+        "• Ley 24.240 - Defensa del Consumidor",
+        "• Ley 11.723 - Propiedad Intelectual",
+        "• Código Civil y Comercial de la Nación",
+        "Cualquier controversia será sometida a los Tribunales Ordinarios competentes de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero o jurisdicción que pudiera corresponder."
+      ]
+    },
+    {
+      "numero": 12,
+      "titulo": "Contacto",
+      "contenido": [
+        "Para consultas, reclamos o ejercicio de derechos bajo la Ley 25.326, podés contactarnos a través de:",
+        "• Email: soporte@gakal.app",
+        "• Sitio web: https://gakal.app"
+      ]
+    }
+  ],
+  "aviso_importante": "La lectura y aceptación de estos Términos es requisito obligatorio para el uso de Gakal. Si no estás de acuerdo con alguna cláusula, no debés registrarte ni utilizar la Aplicación.",
+  "contacto": {
+    "email": "soporte@gakal.app",
+    "web": "https://gakal.app"
+  }
+}

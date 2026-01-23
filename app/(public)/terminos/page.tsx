@@ -1,138 +1,92 @@
+import terminosData from '@/data/terminos-condiciones.json'
+
 export default function TerminosPage() {
   return (
     <div className="py-12 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">
-          Términos y Condiciones
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          {terminosData.documento}
         </h1>
 
-        <div className="prose prose-gray max-w-none space-y-6 text-gray-700">
-          <p className="text-sm text-gray-500">
-            Última actualización: {new Date().toLocaleDateString('es-AR')}
+        <div className="mb-8 flex flex-wrap gap-4 text-sm text-gray-600">
+          <div>
+            <strong>Versión:</strong> {terminosData.version}
+          </div>
+          <div>
+            <strong>Última actualización:</strong>{' '}
+            {new Date(terminosData.fecha_actualizacion).toLocaleDateString('es-AR')}
+          </div>
+          <div>
+            <strong>País:</strong> {terminosData.pais}
+          </div>
+        </div>
+
+        <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-900">
+            <strong>Importante:</strong> {terminosData.aviso_importante}
           </p>
+        </div>
 
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              1. Aceptación de los Términos
-            </h2>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">
+            Legislación Aplicable
+          </h2>
+          <ul className="list-disc pl-6 space-y-1 text-gray-700 text-sm">
+            {terminosData.legislacion.map((ley, index) => (
+              <li key={index}>{ley}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="space-y-8 text-gray-700">
+          {terminosData.secciones.map((seccion) => (
+            <section key={seccion.numero}>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                {seccion.numero}. {seccion.titulo}
+              </h2>
+              <div className="space-y-3">
+                {seccion.contenido.map((parrafo, idx) => (
+                  <p key={idx} className="leading-relaxed">
+                    {parrafo}
+                  </p>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Contacto
+          </h2>
+          <div className="space-y-2 text-gray-700">
             <p>
-              Al acceder y usar Gakal (la &quot;App&quot; y el &quot;Servicio&quot;), aceptás estar vinculado
-              por estos Términos y Condiciones y todas las leyes y regulaciones aplicables
-              en Argentina. Si no estás de acuerdo con alguno de estos términos, tenés
-              prohibido usar o acceder a este sitio y aplicación.
+              <strong>Email:</strong>{' '}
+              <a
+                href={`mailto:${terminosData.contacto.email}`}
+                className="text-primary-600 hover:text-primary-700"
+              >
+                {terminosData.contacto.email}
+              </a>
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              2. Descripción del Servicio
-            </h2>
             <p>
-              Gakal es una aplicación móvil de registro nutricional con gamificación
-              que permite a los usuarios:
+              <strong>Sitio web:</strong>{' '}
+              <a
+                href={terminosData.contacto.web}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-600 hover:text-primary-700"
+              >
+                {terminosData.contacto.web}
+              </a>
             </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Registrar comidas y calcular calorías</li>
-              <li>Analizar fotos de alimentos con inteligencia artificial</li>
-              <li>Trackear progreso nutricional</li>
-              <li>Participar en un sistema de gamificación (XP, logros, rachas)</li>
-              <li>Acceder a funciones premium mediante suscripción</li>
-            </ul>
-          </section>
+          </div>
+        </div>
 
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              3. Registro y Cuenta
-            </h2>
-            <p>
-              Para usar ciertas funciones del Servicio, debés crear una cuenta proporcionando
-              información veraz y completa. Sos responsable de mantener la confidencialidad
-              de tu cuenta y contraseña.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              4. Suscripciones y Pagos
-            </h2>
-            <p>
-              Gakal ofrece planes de suscripción mensuales y anuales. Al suscribirte:
-            </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Autorizás el cobro recurrente según el plan elegido</li>
-              <li>Los pagos se procesan a través de Mercado Pago</li>
-              <li>Los precios están en pesos argentinos (ARS) e incluyen impuestos</li>
-              <li>Podés cancelar tu suscripción en cualquier momento</li>
-              <li>Al cancelar, tu plan seguirá activo hasta el fin del período pagado</li>
-              <li>No ofrecemos reembolsos por períodos no utilizados</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              5. Cancelación
-            </h2>
-            <p>
-              Podés cancelar tu suscripción en cualquier momento desde tu cuenta en
-              gakal.com.ar. La cancelación será efectiva al final de tu período de
-              facturación actual.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              6. Uso Aceptable
-            </h2>
-            <p>Te comprometés a NO:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Usar el Servicio para fines ilegales</li>
-              <li>Intentar hackear o comprometer la seguridad del Servicio</li>
-              <li>Compartir tu cuenta con terceros</li>
-              <li>Usar bots o automatizaciones no autorizadas</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              7. Limitación de Responsabilidad
-            </h2>
-            <p>
-              Gakal es una herramienta de tracking nutricional y NO reemplaza el consejo
-              médico profesional. La información proporcionada es solo para fines informativos.
-              No nos hacemos responsables de decisiones tomadas basadas en la información
-              del Servicio.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              8. Modificaciones
-            </h2>
-            <p>
-              Nos reservamos el derecho de modificar estos términos en cualquier momento.
-              Los cambios significativos serán notificados por email.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              9. Ley Aplicable
-            </h2>
-            <p>
-              Estos términos se rigen por las leyes de la República Argentina,
-              incluyendo la Ley de Defensa del Consumidor N° 24.240.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              10. Contacto
-            </h2>
-            <p>
-              Para consultas sobre estos Términos, contactanos a través de
-              la aplicación o nuestros canales de soporte.
-            </p>
-          </section>
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            <strong>Jurisdicción:</strong> {terminosData.jurisdiccion}
+          </p>
         </div>
       </div>
     </div>

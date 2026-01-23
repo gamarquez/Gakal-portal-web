@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -9,11 +10,15 @@ import { UserProfile, Suscripcion } from '@/types'
 import Link from 'next/link'
 
 export default function CuentaPage() {
+  const router = useRouter()
   const supabase = createClient()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [suscripcion, setSuscripcion] = useState<Suscripcion | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,6 +73,35 @@ export default function CuentaPage() {
   }
 
   const badge = getPlanBadge(profile?.plan_id || 'free')
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true)
+    setDeleteError('')
+
+    try {
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          confirmar: true,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al eliminar la cuenta')
+      }
+
+      // Redirigir a la página principal después de eliminar
+      router.push('/')
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Error al eliminar la cuenta')
+      setDeleteLoading(false)
+    }
+  }
 
   return (
     <div className="py-12">
@@ -176,8 +210,94 @@ export default function CuentaPage() {
               </a>
             </CardContent>
           </Card>
+
+          {/* Zona de Peligro */}
+          <Card className="border-red-200">
+            <CardHeader>
+              <CardTitle className="text-red-600">Zona de Peligro</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                    Eliminar cuenta
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Esta acción es permanente y no se puede deshacer. Se eliminarán todos tus datos personales, incluidos:
+                  </p>
+                  <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1 mb-4">
+                    <li>Tu perfil y configuración</li>
+                    <li>Historial de comidas y registro nutricional</li>
+                    <li>Estadísticas y progreso</li>
+                    <li>Suscripción activa (si la tenés)</li>
+                  </ul>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Conforme a la Ley 25.326, tus datos serán eliminados dentro de los 30 días.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
+                    Eliminar mi cuenta
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* Modal de confirmación */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              ¿Estás seguro?
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Estás por eliminar permanentemente tu cuenta de Gakal. Esta acción no se puede deshacer.
+            </p>
+            {suscripcion && suscripcion.estado === 'active' && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>Atención:</strong> Tenés una suscripción activa que será cancelada automáticamente.
+                </p>
+              </div>
+            )}
+            <p className="text-sm text-gray-600 mb-6">
+              Tus datos serán eliminados conforme a la Ley 25.326 de Protección de Datos Personales.
+            </p>
+
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{deleteError}</p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setDeleteError('')
+                }}
+                disabled={deleteLoading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Eliminando...' : 'Sí, eliminar cuenta'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
