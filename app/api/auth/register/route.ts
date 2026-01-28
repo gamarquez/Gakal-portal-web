@@ -72,7 +72,8 @@ export async function POST(request: NextRequest) {
     const adminClient = createAdminClient()
 
     // Crear perfil con información de términos
-    const { error: perfilError } = await adminClient
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: perfilError } = await (adminClient as any)
       .from('perfiles')
       .insert({
         id: authData.user.id,
