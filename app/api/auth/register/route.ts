@@ -68,20 +68,21 @@ export async function POST(request: NextRequest) {
                request.headers.get('x-real-ip') ||
                'unknown'
 
-    // Usar admin client para actualizar perfil con campos de términos
+    // Usar admin client para crear perfil con campos de términos
     const adminClient = createAdminClient()
 
-    // Actualizar perfil con información de términos
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: perfilError } = await (adminClient as any)
+    // Crear perfil con información de términos
+    const { error: perfilError } = await adminClient
       .from('perfiles')
-      .update({
+      .insert({
+        id: authData.user.id,
+        nombre: nombre,
+        email: email,
         terminos_aceptados: true,
         terminos_fecha_aceptacion: new Date().toISOString(),
         terminos_ip_aceptacion: ip,
         terminos_version_aceptada: '1.0',
       })
-      .eq('id', authData.user.id)
 
     if (perfilError) {
       console.error('Error al actualizar perfil con términos:', perfilError)
