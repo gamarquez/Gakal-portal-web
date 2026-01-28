@@ -1,15 +1,14 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPreApproval } from '@/lib/mercadopago'
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
 
-// Función para verificar la firma del webhook de Mercado Pago
-function verifyWebhookSignature(
+// Función para verificar la firma del webhook de Mercado Pago usando Web Crypto API
+async function verifyWebhookSignature(
   xSignature: string | null,
   xRequestId: string | null,
   dataId: string,
   secret: string
-): boolean {
+): Promise<boolean> {
   if (!xSignature || !xRequestId) {
     return false
   }
@@ -33,17 +32,26 @@ function verifyWebhookSignature(
     // Construir el mensaje a firmar según la documentación de MP
     const message = `id=${dataId}&request-id=${xRequestId}&ts=${ts}`
 
-    // Calcular el HMAC-SHA256
-    const expectedHash = crypto
-      .createHmac('sha256', secret)
-      .update(message)
-      .digest('hex')
+    // Calcular el HMAC-SHA256 usando Web Crypto API (compatible con Edge Runtime)
+    const encoder = new TextEncoder()
+    const keyData = encoder.encode(secret)
+    const messageData = encoder.encode(message)
 
-    // Comparar los hashes de forma segura
-    return crypto.timingSafeEqual(
-      Buffer.from(hash),
-      Buffer.from(expectedHash)
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
     )
+
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+    const expectedHash = Array.from(new Uint8Array(signature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+
+    // Comparar los hashes
+    return hash === expectedHash
   } catch (error) {
     console.error('Error verificando firma del webhook:', error)
     return false
@@ -78,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar la firma HMAC-SHA256
-    const isValid = verifyWebhookSignature(xSignature, xRequestId, dataId, webhookSecret)
+    const isValid = await verifyWebhookSignature(xSignature, xRequestId, dataId, webhookSecret)
     if (!isValid) {
       console.error('Firma del webhook inválida', {
         xSignature,
