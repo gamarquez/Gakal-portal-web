@@ -8,10 +8,12 @@ import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/utils'
 import { UserProfile, Suscripcion } from '@/types'
 import Link from 'next/link'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function CuentaPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { user } = useAuth()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [suscripcion, setSuscripcion] = useState<Suscripcion | null>(null)
@@ -22,10 +24,9 @@ export default function CuentaPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Cargar perfil
+      // Primero obtener el perfil
       const { data: profileData } = await supabase
         .from('perfiles')
         .select('*')
@@ -34,7 +35,7 @@ export default function CuentaPage() {
 
       setProfile(profileData)
 
-      // Cargar suscripción si tiene
+      // Si tiene suscripción activa, cargarla (ya tenemos el ID del perfil)
       if (profileData?.suscripcion_activa_id) {
         const { data: suscripcionData } = await supabase
           .from('suscripciones')
@@ -49,7 +50,7 @@ export default function CuentaPage() {
     }
 
     loadData()
-  }, [supabase])
+  }, [user, supabase])
 
   if (loading) {
     return (

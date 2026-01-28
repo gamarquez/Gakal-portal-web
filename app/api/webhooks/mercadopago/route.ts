@@ -1,20 +1,100 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPreApproval } from '@/lib/mercadopago'
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
+
+// Función para verificar la firma del webhook de Mercado Pago
+function verifyWebhookSignature(
+  xSignature: string | null,
+  xRequestId: string | null,
+  dataId: string,
+  secret: string
+): boolean {
+  if (!xSignature || !xRequestId) {
+    return false
+  }
+
+  try {
+    // Parsear el header x-signature que viene como "ts=1234567890,v1=hash"
+    const signatureParts = xSignature.split(',')
+    let ts = ''
+    let hash = ''
+
+    for (const part of signatureParts) {
+      const [key, value] = part.split('=')
+      if (key === 'ts') ts = value
+      if (key === 'v1') hash = value
+    }
+
+    if (!ts || !hash) {
+      return false
+    }
+
+    // Construir el mensaje a firmar según la documentación de MP
+    const message = `id=${dataId}&request-id=${xRequestId}&ts=${ts}`
+
+    // Calcular el HMAC-SHA256
+    const expectedHash = crypto
+      .createHmac('sha256', secret)
+      .update(message)
+      .digest('hex')
+
+    // Comparar los hashes de forma segura
+    return crypto.timingSafeEqual(
+      Buffer.from(hash),
+      Buffer.from(expectedHash)
+    )
+  } catch (error) {
+    console.error('Error verificando firma del webhook:', error)
+    return false
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Obtener headers de Mercado Pago (para futuro uso en verificación HMAC)
-    // const _xSignature = request.headers.get('x-signature')
-    // const _xRequestId = request.headers.get('x-request-id')
+    // Obtener headers de Mercado Pago
+    const xSignature = request.headers.get('x-signature')
+    const xRequestId = request.headers.get('x-request-id')
 
     // Parsear body
     const body = await request.json()
 
-    console.log('Webhook de Mercado Pago recibido:', {
+    // Verificar firma del webhook (SEGURIDAD CRÍTICA)
+    const webhookSecret = process.env.MP_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      console.error('MP_WEBHOOK_SECRET no configurado')
+      return NextResponse.json(
+        { error: 'Webhook secret not configured' },
+        { status: 500 }
+      )
+    }
+
+    const dataId = body.data?.id
+    if (!dataId) {
+      return NextResponse.json(
+        { error: 'Missing data ID' },
+        { status: 400 }
+      )
+    }
+
+    // Verificar la firma HMAC-SHA256
+    const isValid = verifyWebhookSignature(xSignature, xRequestId, dataId, webhookSecret)
+    if (!isValid) {
+      console.error('Firma del webhook inválida', {
+        xSignature,
+        xRequestId,
+        dataId
+      })
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
+    }
+
+    console.log('Webhook de Mercado Pago recibido y verificado:', {
       type: body.type,
       action: body.action,
-      data_id: body.data?.id,
+      data_id: dataId,
     })
 
     // Verificar que es un webhook de preapproval
@@ -22,14 +102,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    const preapprovalId = body.data?.id
-
-    if (!preapprovalId) {
-      return NextResponse.json(
-        { error: 'Missing preapproval ID' },
-        { status: 400 }
-      )
-    }
+    const preapprovalId = dataId
 
     // Obtener detalles del preapproval desde Mercado Pago
     const mpResult = await getPreApproval(preapprovalId)

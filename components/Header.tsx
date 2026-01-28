@@ -1,37 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
+import { usePathname, useRouter } from 'next/navigation'
 import Button from './ui/Button'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function Header() {
   const pathname = usePathname()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      setLoading(false)
-    }
-
-    getUser()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  const router = useRouter()
+  const { user, loading, signOut } = useAuth()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    window.location.href = '/'
+    await signOut()
+    router.push('/')
   }
 
   return (

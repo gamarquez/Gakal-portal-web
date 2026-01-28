@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Plan, formatPrice } from '@/types/plans'
 import { Card, CardContent, CardFooter, CardHeader } from './ui/Card'
 import Button from './ui/Button'
@@ -14,7 +15,7 @@ interface PlanCardProps {
   disabled?: boolean
 }
 
-export default function PlanCard({
+const PlanCard = memo(function PlanCard({
   plan,
   esAnual,
   onSelect,
@@ -104,4 +105,6 @@ export default function PlanCard({
       </CardFooter>
     </Card>
   )
-}
+})
+
+export default PlanCard
