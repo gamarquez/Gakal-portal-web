@@ -68,26 +68,48 @@ export async function POST(request: NextRequest) {
                request.headers.get('x-real-ip') ||
                'unknown'
 
-    // Usar admin client para crear perfil con campos de términos
+    // El perfil se crea automáticamente por el trigger handle_new_user()
+    // Esperamos a que el perfil exista y luego actualizamos los términos
     const adminClient = createAdminClient()
 
-    // Crear perfil con información de términos
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: perfilError } = await (adminClient as any)
-      .from('perfiles')
-      .insert({
-        id: authData.user.id,
-        nombre: nombre,
-        email: email,
-        terminos_aceptados: true,
-        terminos_fecha_aceptacion: new Date().toISOString(),
-        terminos_ip_aceptacion: ip,
-        terminos_version_aceptada: '1.0',
-      })
+    // Reintentar hasta 5 veces con delays incrementales
+    let perfilActualizado = false
+    for (let i = 0; i < 5; i++) {
+      await new Promise(resolve => setTimeout(resolve, i * 200 + 100))
 
-    if (perfilError) {
-      console.error('Error al actualizar perfil con términos:', perfilError)
-      // No fallar el registro por esto, pero registrar el error
+      // Verificar si el perfil existe
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: perfil } = await (adminClient as any)
+        .from('perfiles')
+        .select('id')
+        .eq('id', authData.user.id)
+        .single()
+
+      if (perfil) {
+        // Perfil existe, actualizar con términos
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: updateError } = await (adminClient as any)
+          .from('perfiles')
+          .update({
+            terminos_aceptados: true,
+            terminos_fecha_aceptacion: new Date().toISOString(),
+            terminos_ip_aceptacion: ip,
+            terminos_version_aceptada: '1.0',
+          })
+          .eq('id', authData.user.id)
+
+        if (!updateError) {
+          perfilActualizado = true
+          break
+        } else {
+          console.error('Error al actualizar perfil:', updateError)
+        }
+      }
+    }
+
+    if (!perfilActualizado) {
+      console.warn('No se pudo actualizar el perfil con términos después de varios intentos')
+      // No fallar el registro por esto, el usuario puede aceptar términos después
     }
 
     return NextResponse.json({
