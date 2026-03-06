@@ -1,0 +1,272 @@
+{
+  "documento": "Política de Privacidad",
+  "empresa": "Gakal",
+  "version": "1.0",
+  "fecha_actualizacion": "2026-01-21",
+  "pais": "Argentina",
+  "legislacion_principal": "Ley 25.326 de Protección de Datos Personales",
+  "organismo_control": {
+    "nombre": "Agencia de Acceso a la Información Pública",
+    "web": "www.argentina.gob.ar/aaip",
+    "email": "datospersonales@aaip.gob.ar"
+  },
+  "secciones": [
+    {
+      "numero": 1,
+      "titulo": "Responsable del Tratamiento de Datos",
+      "datos": {
+        "razon_social": "Gakal",
+        "domicilio": "República Argentina",
+        "email": "soporte@gakal.app",
+        "web": "https://gakal.app"
+      }
+    },
+    {
+      "numero": 2,
+      "titulo": "Información que Recopilamos",
+      "categorias": [
+        {
+          "categoria": "Datos de Registro (obligatorios)",
+          "datos": [
+            "Nombre completo",
+            "Dirección de email",
+            "Contraseña (encriptada, nunca almacenada en texto plano)"
+          ]
+        },
+        {
+          "categoria": "Datos de Perfil Nutricional (opcionales)",
+          "datos": [
+            "Edad, sexo, altura",
+            "Peso actual y objetivo",
+            "Nivel de actividad física",
+            "Objetivo fitness (perder/mantener/ganar peso)",
+            "Preferencias dietéticas (vegetariano, vegano, keto, etc.)",
+            "Alergias e intolerancias alimentarias"
+          ]
+        },
+        {
+          "categoria": "Datos de Salud (sensibles, opcional)",
+          "nota": "Conforme al artículo 7 de la Ley 25.326, requieren consentimiento expreso",
+          "datos": [
+            "Historial de comidas y registro nutricional",
+            "Información calórica y de macronutrientes",
+            "Evolución de peso corporal e IMC",
+            "Medidas corporales (usuarios Oro)"
+          ]
+        },
+        {
+          "categoria": "Fotos de Alimentos",
+          "datos": [
+            "Fotos de comidas para análisis con IA (Plata y Oro)",
+            "Almacenadas en servidores seguros",
+            "Procesadas con OpenAI API"
+          ]
+        },
+        {
+          "categoria": "Datos de Uso y Técnicos",
+          "datos": [
+            "Dirección IP (seguridad y prevención de fraude)",
+            "Tipo de dispositivo y sistema operativo",
+            "Registros de uso de la aplicación (logs)",
+            "Tokens de notificaciones push (con permiso)"
+          ]
+        },
+        {
+          "categoria": "Datos de Pago",
+          "datos": [
+            "Procesados mediante plataformas externas (Mercado Pago, etc.)",
+            "NO almacenamos datos de tarjetas de crédito",
+            "Solo ID de suscripción y estado de pago"
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "titulo": "Finalidad del Tratamiento de Datos",
+      "finalidades": [
+        {
+          "letra": "a",
+          "titulo": "Prestación del Servicio",
+          "descripcion": "Permitir el registro de comidas, cálculo de valores nutricionales, análisis con IA, gamificación, y todas las funcionalidades de Gakal."
+        },
+        {
+          "letra": "b",
+          "titulo": "Personalización",
+          "descripcion": "Calcular TMB, TDEE, recomendaciones calóricas personalizadas según datos antropométricos y objetivos."
+        },
+        {
+          "letra": "c",
+          "titulo": "Gestión de Cuenta",
+          "descripcion": "Administrar suscripción, procesar pagos, enviar facturas."
+        },
+        {
+          "letra": "d",
+          "titulo": "Comunicaciones",
+          "descripcion": "Enviar notificaciones push, recordatorios, avisos de rachas, logros (con consentimiento)."
+        },
+        {
+          "letra": "e",
+          "titulo": "Soporte",
+          "descripcion": "Responder consultas y brindar asistencia técnica."
+        },
+        {
+          "letra": "f",
+          "titulo": "Mejora del Servicio",
+          "descripcion": "Analizar datos agregados y anonimizados para mejorar la app."
+        },
+        {
+          "letra": "g",
+          "titulo": "Seguridad",
+          "descripcion": "Detectar y prevenir fraudes, abusos y actividades ilegales."
+        },
+        {
+          "letra": "h",
+          "titulo": "Cumplimiento Legal",
+          "descripcion": "Cumplir con obligaciones legales y regulatorias aplicables."
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "titulo": "Base Legal del Tratamiento",
+      "bases": [
+        {
+          "tipo": "Consentimiento",
+          "descripcion": "Al aceptar los Términos y esta Política, otorgás consentimiento libre, expreso e informado (art. 5 Ley 25.326)."
+        },
+        {
+          "tipo": "Ejecución del Contrato",
+          "descripcion": "El tratamiento es necesario para brindarte los servicios contratados."
+        },
+        {
+          "tipo": "Interés Legítimo",
+          "descripcion": "Mejora del servicio, seguridad, y prevención de fraudes."
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "titulo": "Compartir Información con Terceros",
+      "nota": "NO vendemos ni alquilamos datos personales",
+      "casos": [
+        {
+          "tipo": "Proveedores de Servicios",
+          "proveedores": [
+            {
+              "nombre": "Supabase",
+              "proposito": "Alojamiento de base de datos"
+            },
+            {
+              "nombre": "OpenAI",
+              "proposito": "Análisis de fotos con IA (Plata y Oro)"
+            },
+            {
+              "nombre": "Mercado Pago / Stripe",
+              "proposito": "Procesamiento de pagos"
+            },
+            {
+              "nombre": "Expo / Firebase",
+              "proposito": "Notificaciones push"
+            }
+          ]
+        },
+        {
+          "tipo": "Requerimientos Legales",
+          "descripcion": "Podemos divulgar información si es requerido por ley, orden judicial, o autoridades competentes."
+        },
+        {
+          "tipo": "Transferencia de Negocio",
+          "descripcion": "En caso de fusión, adquisición o venta, tus datos podrían transferirse al nuevo titular."
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "titulo": "Almacenamiento y Seguridad de Datos",
+      "ubicacion": "Servidores seguros de Supabase (puede incluir infraestructura internacional)",
+      "medidas_seguridad": [
+        "Encriptación SSL/TLS para transmisión de datos",
+        "Contraseñas hasheadas con bcrypt",
+        "Row Level Security (RLS) en base de datos",
+        "Autenticación de dos factores (próximamente)",
+        "Auditorías de seguridad periódicas"
+      ],
+      "retencion": "Conservamos datos mientras la cuenta esté activa. Tras eliminar cuenta, datos se eliminan en 30 días (salvo obligación legal)."
+    },
+    {
+      "numero": 7,
+      "titulo": "Tus Derechos (Ley 25.326)",
+      "derechos": [
+        {
+          "derecho": "Acceso",
+          "descripcion": "Conocer qué datos personales tenemos sobre vos"
+        },
+        {
+          "derecho": "Rectificación",
+          "descripcion": "Corregir datos inexactos o desactualizados"
+        },
+        {
+          "derecho": "Actualización",
+          "descripcion": "Mantener tus datos al día"
+        },
+        {
+          "derecho": "Supresión",
+          "descripcion": "Eliminar tu cuenta y todos los datos asociados"
+        },
+        {
+          "derecho": "Confidencialidad",
+          "descripcion": "Datos sensibles tratados con confidencialidad"
+        },
+        {
+          "derecho": "Información",
+          "descripcion": "Ser informado sobre el tratamiento de tus datos"
+        },
+        {
+          "derecho": "Revocar Consentimiento",
+          "descripcion": "Retirar consentimiento en cualquier momento"
+        }
+      ],
+      "ejercer_derechos": {
+        "email": "soporte@gakal.app",
+        "asunto": "Solicitud ARCO",
+        "requisitos": "Indicar el derecho a ejercer + copia de DNI",
+        "plazo_respuesta": "10 días hábiles"
+      }
+    },
+    {
+      "numero": 8,
+      "titulo": "Cookies y Tecnologías Similares",
+      "nota": "La app móvil NO utiliza cookies tradicionales",
+      "tecnologias": [
+        {
+          "tipo": "Tokens de sesión",
+          "proposito": "Mantener sesión activa"
+        },
+        {
+          "tipo": "Almacenamiento local",
+          "proposito": "Cachear datos y mejorar rendimiento"
+        },
+        {
+          "tipo": "Tokens push",
+          "proposito": "Enviar notificaciones (con consentimiento)"
+        }
+      ]
+    },
+    {
+      "numero": 9,
+      "titulo": "Menores de Edad",
+      "contenido": "Gakal está dirigida a personas mayores de 18 años. No recopilamos intencionalmente datos de menores. Si descubrimos datos de un menor sin autorización parental, los eliminaremos inmediatamente."
+    },
+    {
+      "numero": 10,
+      "titulo": "Modificaciones a esta Política",
+      "contenido": "Nos reservamos el derecho de modificar esta Política en cualquier momento. Cambios sustanciales serán notificados con 10 días de anticipación. La fecha de 'Última actualización' indica la versión vigente."
+    }
+  ],
+  "contacto": {
+    "email": "soporte@gakal.app",
+    "web": "https://gakal.app",
+    "proposito": "Consultas, comentarios o inquietudes sobre privacidad"
+  }
+}

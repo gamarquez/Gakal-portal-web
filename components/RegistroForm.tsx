@@ -1,17 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import TerminosCheckbox from '@/components/TerminosCheckbox'
 
-interface RegistroFormProps {
-  redirectUrl?: string
-}
-
-export default function RegistroForm({ redirectUrl = '/cuenta' }: RegistroFormProps) {
-  const router = useRouter()
+export default function RegistroForm() {
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,13 +14,13 @@ export default function RegistroForm({ redirectUrl = '/cuenta' }: RegistroFormPr
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [terminosError, setTerminosError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setTerminosError('')
 
-    // Validaciones
     if (!aceptoTerminos) {
       setTerminosError('Debes aceptar los Términos y Condiciones para continuar')
       return
@@ -47,15 +41,8 @@ export default function RegistroForm({ redirectUrl = '/cuenta' }: RegistroFormPr
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre,
-          email,
-          password,
-          terminos_aceptados: aceptoTerminos,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, password, terminos_aceptados: aceptoTerminos }),
       })
 
       const data = await response.json()
@@ -64,12 +51,28 @@ export default function RegistroForm({ redirectUrl = '/cuenta' }: RegistroFormPr
         throw new Error(data.error || 'Error al crear la cuenta')
       }
 
-      // Registro exitoso, redirigir
-      router.push(redirectUrl)
+      setSuccess(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear la cuenta')
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="text-center space-y-4">
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-800 font-semibold">¡Cuenta creada exitosamente! 🎉</p>
+          <p className="text-green-700 text-sm mt-2">
+            Te enviamos un email a <strong>{email}</strong> para confirmar tu cuenta.
+            Revisá tu bandeja de entrada y hacé clic en el link de confirmación.
+          </p>
+        </div>
+        <p className="text-xs text-gray-500">
+          ¿No recibiste el email? Revisá la carpeta de spam.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -126,11 +129,7 @@ export default function RegistroForm({ redirectUrl = '/cuenta' }: RegistroFormPr
         </div>
       )}
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={loading}
-      >
+      <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Creando cuenta...' : 'Crear cuenta'}
       </Button>
     </form>

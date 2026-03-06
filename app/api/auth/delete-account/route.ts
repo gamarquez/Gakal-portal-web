@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { cancelPreApproval } from '@/lib/mercadopago'
+import { writeAuditLog } from '@/lib/auditLog'
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,6 +86,13 @@ export async function POST(request: NextRequest) {
       console.error('Error al eliminar perfil:', deletePerfilError)
       // Continuar de todos modos con la eliminación del usuario de Auth
     }
+
+    // Audit log antes de eliminar (después no podremos referenciar el usuario)
+    await writeAuditLog(adminClient, {
+      usuarioId: user.id,
+      accion: 'cuenta_eliminada',
+      metadata: { email: user.email },
+    })
 
     // Paso 5: Eliminar el usuario de Supabase Auth
     const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(

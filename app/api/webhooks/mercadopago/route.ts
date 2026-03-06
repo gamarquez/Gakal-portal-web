@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPreApproval } from '@/lib/mercadopago'
+import { sendPlanActivadoEmail, sendPlanCanceladoEmail, NOMBRES_PLANES } from '@/lib/email'
+import { writeAuditLog } from '@/lib/auditLog'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Función para verificar la firma del webhook de Mercado Pago usando Web Crypto API
@@ -29,6 +31,14 @@ async function verifyWebhookSignature(
       return false
     }
 
+    // Validar timestamp (anti-replay: rechazar si tiene más de 5 minutos)
+    const tsNum = parseInt(ts, 10)
+    const nowSec = Math.floor(Date.now() / 1000)
+    if (Math.abs(nowSec - tsNum) > 300) {
+      console.warn('Webhook timestamp rechazado (posible replay attack):', { ts: tsNum, now: nowSec })
+      return false
+    }
+
     // Construir el mensaje a firmar según la documentación de MP
     const message = `id=${dataId}&request-id=${xRequestId}&ts=${ts}`
 
@@ -37,21 +47,23 @@ async function verifyWebhookSignature(
     const keyData = encoder.encode(secret)
     const messageData = encoder.encode(message)
 
+    // Convertir el hash recibido de hex a bytes para comparación timing-safe
+    const hexPairs = hash.match(/.{2}/g)
+    if (!hexPairs || hexPairs.length === 0) {
+      return false
+    }
+    const hashBytes = new Uint8Array(hexPairs.map(byte => parseInt(byte, 16)))
+
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
       keyData,
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign']
+      ['verify']
     )
 
-    const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
-    const expectedHash = Array.from(new Uint8Array(signature))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-
-    // Comparar los hashes
-    return hash === expectedHash
+    // crypto.subtle.verify() es timing-safe por especificación (evita timing attacks)
+    return await crypto.subtle.verify('HMAC', cryptoKey, hashBytes, messageData)
   } catch (error) {
     console.error('Error verificando firma del webhook:', error)
     return false
@@ -105,7 +117,114 @@ export async function POST(request: NextRequest) {
       data_id: dataId,
     })
 
-    // Verificar que es un webhook de preapproval
+    const supabase = createAdminClient()
+
+    // ── Handler: pago individual (ciclo de facturación) ──────────────────────
+    if (body.type === 'payment') {
+      const mpAccessToken = process.env.MP_ACCESS_TOKEN
+      if (!mpAccessToken) {
+        console.error('MP_ACCESS_TOKEN no configurado')
+        return NextResponse.json({ error: 'MP_ACCESS_TOKEN not configured' }, { status: 500 })
+      }
+
+      const paymentResponse = await fetch(
+        `https://api.mercadopago.com/v1/payments/${dataId}`,
+        { headers: { Authorization: `Bearer ${mpAccessToken}` } }
+      )
+
+      if (!paymentResponse.ok) {
+        console.error('Error al obtener pago de MP:', paymentResponse.status)
+        return NextResponse.json({ received: true })
+      }
+
+      const payment = await paymentResponse.json()
+
+      if (payment.status === 'approved' && payment.preapproval_id) {
+        const { data: suscripcion } = await supabase
+          .from('suscripciones')
+          .select('*')
+          .eq('mp_preapproval_id', payment.preapproval_id)
+          .single<{
+            id: string
+            usuario_id: string
+            plan_id: string
+            estado: 'active' | 'paused' | 'cancelled' | 'expired'
+            es_anual: boolean
+            fecha_cancelacion: string | null
+          }>()
+
+        if (!suscripcion) {
+          console.log('Suscripción no encontrada para payment preapproval:', payment.preapproval_id)
+          return NextResponse.json({ received: true })
+        }
+
+        // Idempotencia: no reprocesar si la suscripción ya fue activada
+        if (suscripcion.estado === 'active') {
+          console.log('Pago ya procesado anteriormente, suscripción activa:', suscripcion.id)
+          return NextResponse.json({ received: true })
+        }
+
+        const ahora = new Date()
+        const fechaFin = new Date(ahora)
+        if (suscripcion.es_anual) {
+          fechaFin.setFullYear(fechaFin.getFullYear() + 1)
+        } else {
+          fechaFin.setMonth(fechaFin.getMonth() + 1)
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: paymentSubError } = await (supabase as any).from('suscripciones').update({
+          estado: 'active',
+          fecha_inicio: ahora.toISOString(),
+          fecha_fin: fechaFin.toISOString(),
+        }).eq('id', suscripcion.id)
+
+        if (paymentSubError) {
+          console.error('Error al activar suscripción por pago:', paymentSubError)
+          return NextResponse.json({ error: 'Error al activar suscripción' }, { status: 500 })
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('perfiles').update({
+          plan_id: suscripcion.plan_id,
+          suscripcion_activa_id: suscripcion.id,
+        }).eq('id', suscripcion.usuario_id)
+
+        // Enviar email de activación
+        try {
+          const { data: authData } = await supabase.auth.admin.getUserById(suscripcion.usuario_id)
+          if (authData?.user?.email) {
+            const nombrePlan = NOMBRES_PLANES[suscripcion.plan_id] ?? suscripcion.plan_id
+            const nombreUsuario = (authData.user.user_metadata?.nombre as string | undefined) ?? 'Usuario'
+            const fechaFinStr = fechaFin.toLocaleDateString('es-AR', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              timeZone: 'America/Argentina/Buenos_Aires',
+            })
+            await sendPlanActivadoEmail(supabase, {
+              userId: suscripcion.usuario_id,
+              email: authData.user.email,
+              nombre: nombreUsuario,
+              plan: nombrePlan,
+              fechaFin: fechaFinStr,
+            })
+          }
+        } catch (emailErr) {
+          console.error('Error al enviar email de activación (no crítico):', emailErr)
+        }
+
+        await writeAuditLog(supabase, {
+          usuarioId: suscripcion.usuario_id,
+          accion: 'plan_activado',
+          metadata: { suscripcion_id: suscripcion.id, plan_id: suscripcion.plan_id, via: 'payment' },
+        })
+
+        console.log('Pago aprobado, suscripción activada:', suscripcion.id)
+      }
+
+      return NextResponse.json({ received: true })
+    }
+
+    // ── Handler: cambio de estado del preapproval ─────────────────────────────
     if (body.type !== 'subscription_preapproval') {
       return NextResponse.json({ received: true })
     }
@@ -124,7 +243,6 @@ export async function POST(request: NextRequest) {
     }
 
     const preapproval = mpResult.data
-    const supabase = createAdminClient()
 
     // Buscar suscripción en la base de datos
     const { data: suscripcion } = await supabase
@@ -159,7 +277,6 @@ export async function POST(request: NextRequest) {
         nuevoEstado = 'cancelled'
         break
       case 'pending':
-        // Mantener el estado actual si está pendiente
         return NextResponse.json({ received: true })
       default:
         nuevoEstado = 'expired'
@@ -171,15 +288,10 @@ export async function POST(request: NextRequest) {
       fecha_inicio?: string
       fecha_fin?: string
       fecha_cancelacion?: string
-    } = {
-      estado: nuevoEstado,
-    }
+    } = { estado: nuevoEstado }
 
-    // Si se activó, establecer fecha de inicio y fin
     if (nuevoEstado === 'active' && suscripcion.estado !== 'active') {
       updateData.fecha_inicio = new Date().toISOString()
-
-      // Calcular fecha de fin según si es anual o mensual
       const fechaFin = new Date()
       if (suscripcion.es_anual) {
         fechaFin.setFullYear(fechaFin.getFullYear() + 1)
@@ -189,7 +301,6 @@ export async function POST(request: NextRequest) {
       updateData.fecha_fin = fechaFin.toISOString()
     }
 
-    // Si se canceló, establecer fecha de cancelación
     if (nuevoEstado === 'cancelled' && !suscripcion.fecha_cancelacion) {
       updateData.fecha_cancelacion = new Date().toISOString()
     }
@@ -208,7 +319,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Actualizar perfil del usuario con el nuevo plan
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: profileError } = await (supabase as any)
       .from('perfiles')
@@ -221,6 +331,50 @@ export async function POST(request: NextRequest) {
     if (profileError) {
       console.error('Error al actualizar perfil:', profileError)
     }
+
+    // Enviar emails según el cambio de estado
+    try {
+      const { data: authData } = await supabase.auth.admin.getUserById(suscripcion.usuario_id)
+      if (authData?.user?.email) {
+        const nombrePlan = NOMBRES_PLANES[suscripcion.plan_id] ?? suscripcion.plan_id
+        const nombreUsuario = (authData.user.user_metadata?.nombre as string | undefined) ?? 'Usuario'
+
+        if (nuevoEstado === 'active' && suscripcion.estado !== 'active') {
+          const fechaFinStr = updateData.fecha_fin
+            ? new Date(updateData.fecha_fin).toLocaleDateString('es-AR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                timeZone: 'America/Argentina/Buenos_Aires',
+              })
+            : '-'
+          await sendPlanActivadoEmail(supabase, {
+            userId: suscripcion.usuario_id,
+            email: authData.user.email,
+            nombre: nombreUsuario,
+            plan: nombrePlan,
+            fechaFin: fechaFinStr,
+          })
+        } else if (nuevoEstado === 'cancelled' || nuevoEstado === 'paused') {
+          await sendPlanCanceladoEmail(supabase, {
+            userId: suscripcion.usuario_id,
+            email: authData.user.email,
+            nombre: nombreUsuario,
+            plan: nombrePlan,
+            accion: nuevoEstado === 'cancelled' ? 'cancelada' : 'pausada',
+          })
+        }
+      }
+    } catch (emailErr) {
+      console.error('Error al enviar email de notificación (no crítico):', emailErr)
+    }
+
+    const auditAccion = nuevoEstado === 'active' ? 'plan_activado'
+      : nuevoEstado === 'cancelled' ? 'plan_cancelado'
+      : 'plan_pausado'
+    await writeAuditLog(supabase, {
+      usuarioId: suscripcion.usuario_id,
+      accion: auditAccion,
+      metadata: { suscripcion_id: suscripcion.id, plan_id: suscripcion.plan_id, via: 'preapproval' },
+    })
 
     console.log('Suscripción actualizada:', {
       suscripcion_id: suscripcion.id,
@@ -241,6 +395,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
-// Permitir que el webhook sea llamado desde Mercado Pago
-export const runtime = 'edge'

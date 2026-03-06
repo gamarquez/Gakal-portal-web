@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { cancelPreApproval } from '@/lib/mercadopago'
+import { writeAuditLog } from '@/lib/auditLog'
 import { NextResponse } from 'next/server'
 import { Suscripcion } from '@/types'
 
@@ -58,7 +59,7 @@ export async function POST() {
       }
     }
 
-    // Actualizar estado en Supabase
+    // Actualizar suscripción en Supabase
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: updateError } = await (supabase as any)
       .from('suscripciones')
@@ -75,6 +76,23 @@ export async function POST() {
       )
     }
 
+    // Actualizar perfil: resetear plan a free y limpiar suscripción activa
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('perfiles')
+      .update({
+        plan_id: 'free',
+        suscripcion_activa_id: null,
+      })
+      .eq('id', user.id)
+
+    // Audit log
+    await writeAuditLog(supabase, {
+      usuarioId: user.id,
+      accion: 'plan_cancelado',
+      metadata: { suscripcion_id: suscripcion.id, plan_id: suscripcion.plan_id },
+    })
+
     return NextResponse.json({
       success: true,
       message: 'Suscripción cancelada exitosamente',
@@ -87,5 +105,3 @@ export async function POST() {
     )
   }
 }
-
-export const runtime = 'edge'

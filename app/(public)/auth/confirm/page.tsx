@@ -41,6 +41,13 @@ function ConfirmContent() {
           return
         }
 
+        // Enviar email de bienvenida si es una confirmación de registro
+        if (type === 'signup' || type === 'email') {
+          fetch('/api/auth/welcome-email', { method: 'POST' }).catch(() => {
+            // No crítico: el email de bienvenida no debe bloquear el flujo
+          })
+        }
+
         // Éxito
         setStatus('success')
         setMessage('¡Tu email ha sido confirmado exitosamente!')

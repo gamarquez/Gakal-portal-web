@@ -1,0 +1,209 @@
+PROMPT PARA DESARROLLADOR FRONTEND: Implementar Términos y Condiciones en Registro Web
+
+====================================
+CONTEXTO
+====================================
+
+Proyecto: Gakal - App de registro nutricional con gamificación (Argentina)
+Stack: Next.js 14+ (App Router) + TypeScript + Tailwind CSS + Supabase
+Legislación: Ley 25.326 (Protección de Datos Personales Argentina)
+
+====================================
+DOCUMENTOS LEGALES DISPONIBLES
+====================================
+
+Tengo 2 archivos JSON con términos completos:
+- terminos-condiciones.json (12 secciones)
+- politica-privacidad.json (12 secciones)
+
+Estructura JSON:
+{
+  "documento": "Términos y Condiciones",
+  "version": "1.0",
+  "fecha_actualizacion": "2026-01-21",
+  "secciones": [
+    {
+      "numero": 1,
+      "titulo": "Definiciones",
+      "contenido": ["texto...", "texto..."]
+    }
+  ],
+  "contacto": { "email": "soporte@gakal.app" }
+}
+
+====================================
+ESQUEMA BASE DE DATOS (SUPABASE)
+====================================
+
+Tabla: perfiles
+- terminos_aceptados BOOLEAN
+- terminos_fecha_aceptacion TIMESTAMPTZ
+- terminos_ip_aceptacion TEXT
+- terminos_version_aceptada TEXT (default '1.0')
+
+====================================
+IMPLEMENTAR
+====================================
+
+1. COMPONENTE: TerminosCheckbox.tsx
+   - Checkbox obligatorio
+   - Texto: "He leído y acepto los [Términos] y la [Política de Privacidad]"
+   - Enlaces abren en nueva pestaña
+   - Mención a Ley 25.326
+   - Props: checked, onChange, error
+
+2. PÁGINA: /terminos-condiciones
+   - Renderiza JSON estructurado
+   - Header con versión + fecha
+   - Secciones numeradas
+   - Footer con contacto
+   - Responsive
+
+3. PÁGINA: /politica-privacidad
+   - Igual que términos pero con datos de privacidad
+
+4. COMPONENTE: RegistroForm.tsx
+   - Campos: nombre, email, password
+   - Incluye TerminosCheckbox
+   - Validación: no permitir submit sin aceptar
+   - Submit → POST /api/auth/register
+
+5. API ROUTE: /api/auth/register
+   Input:
+   {
+     nombre, email, password,
+     terminos_aceptados: boolean
+   }
+
+   Lógica:
+   - Validar terminos_aceptados === true
+   - Crear usuario Supabase Auth
+   - Actualizar perfiles con:
+     * terminos_aceptados: true
+     * terminos_fecha_aceptacion: NOW()
+     * terminos_ip_aceptacion: req.ip
+     * terminos_version_aceptada: '1.0'
+
+====================================
+EJEMPLO RÁPIDO
+====================================
+
+// TerminosCheckbox.tsx
+export function TerminosCheckbox({ checked, onChange, error }) {
+  return (
+    <label className="flex items-start gap-3">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span className="text-sm text-gray-700">
+        He leído y acepto los{' '}
+        <a href="/terminos-condiciones" target="_blank" className="text-blue-600 font-semibold">
+          Términos y Condiciones
+        </a>{' '}
+        y la{' '}
+        <a href="/politica-privacidad" target="_blank" className="text-blue-600 font-semibold">
+          Política de Privacidad
+        </a>.
+        Entiendo que mis datos serán tratados conforme a la Ley 25.326.
+      </span>
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+    </label>
+  );
+}
+
+// Formulario
+const [aceptoTerminos, setAceptoTerminos] = useState(false);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!aceptoTerminos) {
+    setError('Debes aceptar los Términos y Condiciones');
+    return;
+  }
+  // ... registrar usuario
+};
+
+// API Route
+export async function POST(req) {
+  const { terminos_aceptados } = await req.json();
+
+  if (!terminos_aceptados) {
+    return NextResponse.json({ error: 'Debes aceptar términos' }, { status: 400 });
+  }
+
+  // Crear usuario Supabase Auth
+  const { data: authData } = await supabase.auth.admin.createUser({...});
+
+  // Actualizar perfil
+  await supabase.from('perfiles').update({
+    terminos_aceptados: true,
+    terminos_fecha_aceptacion: new Date().toISOString(),
+    terminos_ip_aceptacion: req.headers.get('x-forwarded-for'),
+    terminos_version_aceptada: '1.0',
+  }).eq('id', authData.user.id);
+}
+
+====================================
+VALIDACIONES OBLIGATORIAS
+====================================
+
+✅ Checkbox debe estar marcado para submit
+✅ Mostrar error si intenta registrarse sin aceptar
+✅ Enlaces a términos deben abrir en nueva pestaña
+✅ Capturar IP del usuario (backend)
+✅ Registrar fecha/hora de aceptación
+✅ BD debe tener terminos_aceptados = true
+
+====================================
+UX/UI
+====================================
+
+- Checkbox grande (20x20px mínimo)
+- Texto legible (14px+)
+- Enlaces visualmente diferenciados
+- Error en rojo si no acepta
+- Botón submit deshabilitado si loading
+- Responsive móvil
+
+====================================
+ENTREGABLES
+====================================
+
+1. TerminosCheckbox.tsx
+2. app/terminos-condiciones/page.tsx
+3. app/politica-privacidad/page.tsx
+4. RegistroForm.tsx
+5. app/api/auth/register/route.ts
+6. data/terminos-condiciones.json (path sugerido)
+7. data/politica-privacidad.json (path sugerido)
+
+====================================
+VARIABLES DE ENTORNO
+====================================
+
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
+SUPABASE_SERVICE_ROLE_KEY=eyJxxx... (para admin.createUser)
+
+====================================
+TESTING
+====================================
+
+1. Intentar registrar SIN aceptar términos → Error
+2. Registrar aceptando términos → Éxito
+3. Verificar BD: terminos_aceptados = true
+4. Verificar fecha y versión guardadas
+5. Abrir /terminos-condiciones → Renderiza OK
+6. Click en enlace desde checkbox → Abre nueva pestaña
+
+====================================
+NOTAS IMPORTANTES
+====================================
+
+- TypeScript estricto
+- Tailwind CSS para estilos
+- Código limpio y comentado
+- Manejo de errores robusto
+- Los JSON ya están creados y listos para usar
+- La migración de BD ya está aplicada
+- Solo falta implementar frontend web
+
+Por favor implementa todos los componentes listados arriba con TypeScript + Next.js 14 App Router + Tailwind CSS.

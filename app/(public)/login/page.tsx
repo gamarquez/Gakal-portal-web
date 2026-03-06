@@ -193,7 +193,7 @@ function LoginForm() {
               {/* Registro Form */}
               {activeTab === 'registro' && (
                 <>
-                  <RegistroForm redirectUrl={redirect} />
+                  <RegistroForm />
 
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <p className="text-center text-sm text-gray-600">

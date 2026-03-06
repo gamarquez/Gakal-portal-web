@@ -87,14 +87,3 @@ export async function getPreApproval(preapprovalId: string) {
   }
 }
 
-// TODO: Implementar verificación de firma del webhook
-// export function verifyWebhookSignature(
-//   xSignature: string,
-//   xRequestId: string,
-//   dataId: string
-// ): boolean {
-//   // Ver: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
-//   const secret = process.env.MP_WEBHOOK_SECRET!
-//   // Implementar verificación con HMAC
-//   return true
-// }
